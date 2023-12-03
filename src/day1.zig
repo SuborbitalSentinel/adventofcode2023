@@ -29,97 +29,32 @@ pub fn part1(filePath: []const u8) !u32 {
 pub fn part2(filePath: []const u8) !u32 {
     var total: u32 = 0;
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
-    var map = std.StringHashMap(u8).init(allocator);
-    var keyIter = map.keyIterator();
-    defer {
-        while (keyIter.next()) |key| {
-            allocator.free(key.*);
-        }
-        map.deinit();
-    }
-    try map.put("e", '0');
-    try map.put("ei", '0');
-    try map.put("eig", '0');
-    try map.put("eigh", '0');
-    try map.put("eight", '8');
-    try map.put("f", '0');
-    try map.put("fi", '0');
-    try map.put("fiv", '0');
-    try map.put("five", '5');
-    try map.put("fo", '0');
-    try map.put("fou", '0');
-    try map.put("four", '4');
-    try map.put("n", '0');
-    try map.put("ni", '0');
-    try map.put("nin", '0');
-    try map.put("nine", '9');
-    try map.put("o", '0');
-    try map.put("on", '0');
-    try map.put("one", '1');
-    try map.put("s", '0');
-    try map.put("se", '0');
-    try map.put("sev", '0');
-    try map.put("seve", '0');
-    try map.put("seven", '7');
-    try map.put("si", '0');
-    try map.put("six", '6');
-    try map.put("t", '0');
-    try map.put("th", '0');
-    try map.put("thr", '0');
-    try map.put("thre", '0');
-    try map.put("three", '3');
-    try map.put("tw", '0');
-    try map.put("two", '2');
-
     for (try utils.readFile(filePath)) |line| {
         var choicecount: u8 = 0;
         var choices: [50]u8 = undefined;
 
-        var buffcount: u8 = 0;
+        var bufcount: u8 = 0;
         var buf: [10]u8 = undefined;
         for (line) |char| {
             const is_integer = char >= 48 and char <= 57;
             if (is_integer) {
                 choices[choicecount] = char;
                 choicecount += 1;
-                buffcount = 0;
+                bufcount = 0;
                 continue;
             }
 
-            buf[buffcount] = char;
-            buffcount += 1;
+            buf[bufcount] = char;
+            bufcount += 1;
 
-            if (map.get(buf[0..buffcount])) |value| {
+            if (validNums.get(buf[0..bufcount])) |value| {
                 if (value != '0') {
                     choices[choicecount] = value;
                     choicecount += 1;
-
-                    var temp: [10]u8 = undefined;
-                    for (buf[1..buffcount], 0..) |x, i| {
-                        temp[i] = x;
-                    }
-                    buf = temp;
-                    buffcount -= 1;
-
-                    while (buffcount > 0 and !map.contains(buf[0..buffcount])) {
-                        for (buf[1..buffcount], 0..) |x, i| {
-                            temp[i] = x;
-                        }
-                        buf = temp;
-                        buffcount -= 1;
-                    }
+                    bufcount = rotateBufferUntilValidOrEmpty(&buf, bufcount);
                 }
             } else {
-                while (buffcount > 0 and !map.contains(buf[0..buffcount])) {
-                    var temp: [10]u8 = undefined;
-                    for (buf[1..buffcount], 0..) |x, i| {
-                        temp[i] = x;
-                    }
-                    buf = temp;
-                    buffcount -= 1;
-                }
+                bufcount = rotateBufferUntilValidOrEmpty(&buf, bufcount);
             }
         }
         const value = try std.fmt.parseInt(u32, &[2]u8{ choices[0], choices[choicecount - 1] }, 10);
@@ -127,3 +62,58 @@ pub fn part2(filePath: []const u8) !u32 {
     }
     return total;
 }
+
+fn rotateBufferUntilValidOrEmpty(buf: *[10]u8, bufcount: u8) u8 {
+    var tmpcnt = bufcount;
+    var tmp: [10]u8 = undefined;
+    for (buf[1..tmpcnt], 0..) |x, i| {
+        tmp[i] = x;
+    }
+    @memcpy(buf, &tmp);
+    tmpcnt -= 1;
+
+    while (tmpcnt > 0 and !validNums.has(buf[0..tmpcnt])) {
+        for (buf[1..tmpcnt], 0..) |x, i| {
+            tmp[i] = x;
+        }
+        @memcpy(buf, &tmp);
+        tmpcnt -= 1;
+    }
+    return tmpcnt;
+}
+
+const validNums = std.ComptimeStringMap(u8, .{
+    .{ "e", '0' },
+    .{ "ei", '0' },
+    .{ "eig", '0' },
+    .{ "eigh", '0' },
+    .{ "eight", '8' },
+    .{ "f", '0' },
+    .{ "fi", '0' },
+    .{ "fiv", '0' },
+    .{ "five", '5' },
+    .{ "fo", '0' },
+    .{ "fou", '0' },
+    .{ "four", '4' },
+    .{ "n", '0' },
+    .{ "ni", '0' },
+    .{ "nin", '0' },
+    .{ "nine", '9' },
+    .{ "o", '0' },
+    .{ "on", '0' },
+    .{ "one", '1' },
+    .{ "s", '0' },
+    .{ "se", '0' },
+    .{ "sev", '0' },
+    .{ "seve", '0' },
+    .{ "seven", '7' },
+    .{ "si", '0' },
+    .{ "six", '6' },
+    .{ "t", '0' },
+    .{ "th", '0' },
+    .{ "thr", '0' },
+    .{ "thre", '0' },
+    .{ "three", '3' },
+    .{ "tw", '0' },
+    .{ "two", '2' },
+});
