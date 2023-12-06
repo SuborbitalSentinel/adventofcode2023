@@ -2,11 +2,11 @@ const std = @import("std");
 const utils = @import("utils.zig");
 
 test "day1 part1" {
-    try std.testing.expect(try part1("./inputs/day1/test1") == 142);
+    try std.testing.expectEqual(@as(u32, 142), try part1("./inputs/day1/test1"));
 }
 
 test "day1 part2" {
-    try std.testing.expect(try part2("./inputs/day1/test2") == 281);
+    try std.testing.expectEqual(@as(u32, 281), try part2("./inputs/day1/test2"));
 }
 
 pub fn part1(filePath: []const u8) !u32 {
