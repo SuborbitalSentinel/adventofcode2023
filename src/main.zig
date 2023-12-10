@@ -6,8 +6,9 @@ pub fn main() !void {
 
     std.debug.print("day1, part1: {d}\n", .{try day1.part1("./inputs/day1/puzzle")});
     std.debug.print("day1, part2: {d}\n", .{try day1.part2("./inputs/day1/puzzle")});
-
+    std.debug.print("\n", .{});
     std.debug.print("day2, part1: {d}\n", .{try day2.part1("./inputs/day2/puzzle")});
+    std.debug.print("day2, part2: {d}\n", .{try day2.part2("./inputs/day2/puzzle")});
 }
 
 test {
